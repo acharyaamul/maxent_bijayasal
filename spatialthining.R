@@ -44,9 +44,9 @@ plot(b_sf)
 
 mapview(b_sf)+mapview(bijay_wgs)
 
-write_sf(b_sf,"~/00_work/00_bijaysal/csv/bijaya_wgs_thined.shp")
-write_sf(bijay_wgs,"~/00_work/00_bijaysal/csv/bijaya_wgs.shp")
+#write_sf(b_sf,"~/00_work/00_bijaysal/data/bijaya_wgs_thined.shp")
+#write_sf(bijay_wgs,"~/00_work/00_bijaysal/data/bijaya_wgs.shp")
 
-
+###End###
 
 
