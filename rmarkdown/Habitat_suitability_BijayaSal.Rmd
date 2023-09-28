@@ -43,6 +43,10 @@ library(sf) # Load raster and Vector data
 library(mapview) # Visualization of Vector Data
 library(raster) # Load raster and Vector data
 library(spThin) #To thin the spatial data
+library(usdm) # VIF (variance Inflation Factor)measures the severity of multicollinearity in regression analysis. 
+library(predicts)
+library(RColorBrewer)
+
 ```
 
 # Load Presence data of Bijaya Sal ( *Pterocarpus marsupium* )
@@ -56,10 +60,141 @@ names(bijaysal)
 
 # Split of Data into Training and Test Set
 
-The data is splited into Training and Test set. The 80% of the total data is used for training the model and rest data set is used for evaluate the model.
+The data is splited into Training and Test set. The 70% of the total data is used for training the model and rest data set is used for evaluate the model.
 
 
 ```{r}
-
+#make this example reproducible
+set.seed(1)
+#use 70% of dataset as training set and 30% as test set
+sample <- sample(c(TRUE, FALSE), nrow(bijaysal), replace=TRUE, prob=c(0.7,0.3))
+train  <- bijaysal[sample, ]
+test   <- bijaysal[!sample, ]
 
 ```
+
+## Train data 
+
+```{r}
+train_sf<-st_as_sf(train, coords = c("easting", "northing"), crs = 32644)
+train_wgs<-st_transform(train_sf,crs=4326)
+train_sp<-as_Spatial(train_wgs)
+train_data<-data.frame(train_sp)
+names(train_data)
+names(train_data)[3]<- "lon"
+names(train_data)[4]<- "lat"
+train_data$species<-"bijayasal"
+```
+
+### Spatial thining of Train data
+
+Here we are going to keep only the train point which is 1 km far.
+
+```{r message=FALSE, warning=FALSE}
+
+#thinning the points
+# thinned_data <- thin(
+#   loc.data = train_data, 
+#   lat.col = "lat", #latitude, the string name should be modified accordingly
+#   long.col = "lon", #longitude, the string name should be modified accordingly
+#   spec.col = "species", #name of the column with species name
+#   thin.par = 1, #distance of the thinned points
+#   reps = 1, #number of repetition, for randomness
+#   locs.thinned.list.return = TRUE, #If true, the ‘list‘ of the data.frame of thinned locs resulting from each replication is returned 
+#   write.files = T, #whether to create the csv file or not
+#   max.files = 10, #number of csv files created.
+#   out.dir = "./data", #output directory in which the folder is created
+#   out.base = "train", #the name of folders thus created
+#   write.log.file = F, #whether to create log file or nor 
+#   log.file = "noct.txt" # create/append log file of thinning run
+# )
+
+train_pts<-read.csv("data/train_thin1.csv",header=T)
+trainsf<-st_as_sf(train_pts, coords = c("lon", "lat"), crs = 4326)
+#write_sf(trainsf,"./data/train_thined.shp")
+
+```
+
+## Test data 
+
+```{r}
+test_sf<-st_as_sf(test, coords = c("easting", "northing"), crs = 32644)
+test_wgs<-st_transform(test_sf,crs=4326)
+test_sp<-as_Spatial(test_wgs)
+test_data<-data.frame(test_sp)
+names(test_data)
+names(test_data)[3]<- "lon"
+names(test_data)[4]<- "lat"
+test_data$species<-"bijayasal"
+```
+
+### Spatial thining of Test data
+
+Here we are going to keep only the test point which is 1 km far.
+
+```{r message=FALSE, warning=FALSE}
+
+#thinning the points
+# thinned_data <- thin(
+#   loc.data = test_data, 
+#   lat.col = "lat", #latitude, the string name should be modified accordingly
+#   long.col = "lon", #longitude, the string name should be modified accordingly
+#   spec.col = "species", #name of the column with species name
+#   thin.par = 1, #distance of the thinned points
+#   reps = 1, #number of repetition, for randomness
+#   locs.thinned.list.return = TRUE, #If true, the ‘list‘ of the data.frame of thinned locs resulting from each replication is returned 
+#   write.files = T, #whether to create the csv file or not
+#   max.files = 10, #number of csv files created.
+#   out.dir = "./data", #output directory in which the folder is created
+#   out.base = "test", #the name of folders thus created
+#   write.log.file = F, #whether to create log file or nor 
+#   log.file = "noct.txt" # create/append log file of thinning run
+# )
+test_pts<-read.csv("data/test_thin1.csv",header=T)
+testsf<-st_as_sf(test_pts, coords = c("lon", "lat"), crs = 4326)
+#write_sf(testsf,"./data/test_thined.shp")
+```
+
+# Loading Worldclim data and Topographic data
+
+#BIO1 = Annual Mean Temperature
+#BIO2 = Mean Diurnal Range (Mean of monthly (max temp - min temp))
+#BIO3 = Isothermality (BIO2/BIO7) (* 100)
+#BIO4 = Temperature Seasonality (standard deviation *100)
+#BIO5 = Max Temperature of Warmest Month
+#BIO6 = Min Temperature of Coldest Month
+#BIO7 = Temperature Annual Range (BIO5-BIO6)
+#BIO8 = Mean Temperature of Wettest Quarter
+#BIO9 = Mean Temperature of Driest Quarter
+#BIO10 = Mean Temperature of Warmest Quarter
+#BIO11 = Mean Temperature of Coldest Quarter
+#BIO12 = Annual Precipitation
+#BIO13 = Precipitation of Wettest Month
+#BIO14 = Precipitation of Driest Month
+#BIO15 = Precipitation Seasonality (Coefficient of Variation)
+#BIO16 = Precipitation of Wettest Quarter
+#BIO17 = Precipitation of Driest Quarter
+#BIO18 = Precipitation of Warmest Quarter
+#BIO19 = Precipitation of Coldest Quarter
+
+
+```{r}
+ls.dir<-"./data/wc2.1_30s_bio/"
+rlst <- list.files(ls.dir, pattern = "*.tif$",full.names = T)
+worldclim<-rast(rlst)
+names(worldclim)
+projection(worldclim)
+####Load DEM data ####
+elevation<-rast("./data/nepal_dem90m.tif")
+elev<-resample(elevation,worldclim, method="bilinear")
+#slope and Aspect from DEM
+slope<- terrain(elev, "slope", unit= "degrees", neighbors=8)
+aspect <- terrain(elev, "aspect",unit= "degrees", neighbors=8) 
+imag_com<-c(worldclim,elev,slope,aspect)
+names(imag_com)
+class(imag_com)
+#terra::writeRaster(imag_com,"./data/imag_com.tif",overwrite=TRUE)
+```
+# Multicolinearity Check
+VIF ()
+
