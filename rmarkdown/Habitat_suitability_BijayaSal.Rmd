@@ -1,0 +1,60 @@
+---
+title: "Habitat Suitability Analysis of Bijaya Sal"
+date: "`r Sys.Date()`"
+output: 
+  pdf_document: 
+    number_sections: yes
+number_sections: yes
+geometry: left = 2.5cm, right = 2cm, top = 2cm, bottom = 2cm
+fontsize: 12pt
+header-includes:
+- \usepackage{float}
+- \usepackage{sectsty}
+- \usepackage{paralist}
+- \usepackage{setspace}\spacing{1.5}
+- \usepackage{fancyhdr}
+- \usepackage{lastpage}
+- \usepackage{dcolumn}
+- \usepackage{natbib}\bibliographystyle{agsm}
+- \usepackage[nottoc, numbib]{tocbibind}
+---
+
+\pagenumbering{arabic}
+
+\pagenumbering{gobble}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+\pagebreak
+
+\tableofcontents
+
+\newpage
+
+\pagenumbering{arabic}
+
+
+
+# Load Packages
+
+
+
+```{r message=FALSE, warning=FALSE, , echo=T}
+
+library(sf) # Load raster and Vector data
+library(mapview) # Visualization of Vector Data
+library(raster) # Load raster and Vector data
+library(spThin) #To thin the spatial data
+```
+
+# Load Presence data of Bijaya Sal ( *Pterocarpus marsupium* )
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

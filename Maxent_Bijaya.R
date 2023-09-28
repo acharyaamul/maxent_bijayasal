@@ -2,6 +2,7 @@
 library(raster) # load tif file
 library(usdm) # VIF (variance Inflation Factor)measures the severity of multicollinearity in regression analysis. 
 library(predicts)
+library(dismo)
 ####Load Worldclim Data ####
 ls.dir<-"./data/wc2.1_30s_bio/"
 rlst <- list.files(ls.dir, pattern = "*.tif$",full.names = T)
@@ -25,7 +26,7 @@ names(preds)
 class(preds)
 plot(preds)
 
-terra::writeRaster(preds,"./data/raster_afVIF.tif",overwrite=TRUE)
+#terra::writeRaster(preds,"./data/raster_afVIF.tif",overwrite=TRUE)
 #### Load Presence file###
 bijay_data<-vect("./data/bijaya_wgs_thined.shp")
 nepal<-vect("./data/nepal_boundary.shp")
@@ -34,11 +35,22 @@ names(r)
 plot(r)
 ####Run Maxent Model####
 max_bijay <- MaxEnt(r,bijay_data) 
+
+#### save the results###
+max_bijay@path
+
+source_file<-max_bijay@path
+dir.create("maxent_results")
+destination_folder<-"./maxent_results/"
+file.copy(source_file,destination_folder,recursive = T)
+#### Save Variables Contribution#####
+jpeg(file="./maxent_results/Variable_Inportance.jpeg")
 plot(max_bijay)
+dev.off()
 ####Predict ####
 bijaya_pred <- predict(max_bijay,r)
 plot(bijaya_pred)
 plot(nepal,add=T)
 plot(bijay_data,pch=1,cex=0.5,col="blue",add=T)
-terra::writeRaster(preds,"./data/maxent_bijaya.tif",overwrite=TRUE)
+writeRaster(bijaya_pred,"./maxent_results/maxent_bijaya.tif",overwrite=TRUE)
 
