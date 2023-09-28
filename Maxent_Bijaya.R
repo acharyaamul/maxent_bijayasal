@@ -34,7 +34,7 @@ r<-rast("./data/raster_afVIF.tif")
 names(r)
 plot(r)
 ####Run Maxent Model####
-max_bijay <- MaxEnt(r,bijay_data) 
+max_bijay <- MaxEnt(r,bijay_data,args=c("-J","-P")) 
 
 #### save the results###
 max_bijay@path
@@ -42,11 +42,12 @@ max_bijay@path
 source_file<-max_bijay@path
 dir.create("maxent_results")
 destination_folder<-"./maxent_results/"
-file.copy(source_file,destination_folder,recursive = T)
+file.copy(source_file,destination_folder,recursive = T,overwrite = T)
 #### Save Variables Contribution#####
 jpeg(file="./maxent_results/Variable_Inportance.jpeg")
 plot(max_bijay)
 dev.off()
+
 ####Predict ####
 bijaya_pred <- predict(max_bijay,r)
 plot(bijaya_pred)

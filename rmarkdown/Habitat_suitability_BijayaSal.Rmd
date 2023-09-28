@@ -35,11 +35,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 \pagenumbering{arabic}
 
-
-
 # Load Packages
-
-
 
 ```{r message=FALSE, warning=FALSE, , echo=T}
 
@@ -51,10 +47,19 @@ library(spThin) #To thin the spatial data
 
 # Load Presence data of Bijaya Sal ( *Pterocarpus marsupium* )
 
-You can also embed plots, for example:
+The coordinate of present data is in WGS 84 UTM 44 system.
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r , echo=FALSE}
+bijaysal<-read.csv("~/00_work/00_bijaysal/data/bijasal_presence.csv",header=T)
+names(bijaysal)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+# Split of Data into Training and Test Set
+
+The data is splited into Training and Test set. The 80% of the total data is used for training the model and rest data set is used for evaluate the model.
+
+
+```{r}
+
+
+```
