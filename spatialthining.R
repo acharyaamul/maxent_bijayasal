@@ -1,11 +1,10 @@
-setwd("~/00_work/00_bijaysal")
+setwd("~/00_work/00_bijaysal/data")
 list.files()
 library(sf)
 library(mapview)
 library(raster)
-library(rgeos)
 library(spThin)
-library(rangeBuilder)
+
 bijaysal<-read.csv("bijasal_presence.csv",header=T)
 bijaya_sf<-st_as_sf(bijaysal, coords = c("easting", "northing"), crs = 32644)
 bijay_wgs<-st_transform(bijaya_sf,crs=4326)
