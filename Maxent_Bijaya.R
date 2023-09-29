@@ -2,7 +2,7 @@
 library(raster) # load tif file
 library(usdm) # VIF (variance Inflation Factor)measures the severity of multicollinearity in regression analysis. 
 library(predicts)
-library(dismo)
+library("RColorBrewer")
 ####Load Worldclim Data ####
 ls.dir<-"./data/wc2.1_30s_bio/"
 rlst <- list.files(ls.dir, pattern = "*.tif$",full.names = T)
@@ -53,5 +53,12 @@ bijaya_pred <- predict(max_bijay,r)
 plot(bijaya_pred)
 plot(nepal,add=T)
 plot(bijay_data,pch=1,cex=0.5,col="blue",add=T)
-writeRaster(bijaya_pred,"./maxent_results/maxent_bijaya.tif",overwrite=TRUE)
-
+#writeRaster(bijaya_pred,"./maxent_results/maxent_bijaya.tif",overwrite=TRUE)
+m <- c(0, 0.2, 1,
+       0.2, 0.4, 2,
+       0.4, 0.6, 3,
+       0.6,1, 4)
+rclmat <- matrix(m, ncol=3, byrow=TRUE)
+maxent_reclass <- classify(bijaya_pred, rclmat, include.lowest=TRUE)
+plot(maxent_reclass,col=brewer.pal(n = 4, name = "RdBu"))
+#writeRaster(maxent_reclass,"./maxent_results/maxent_bijaya_reclass.tif",overwrite=TRUE)
